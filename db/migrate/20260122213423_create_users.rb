@@ -1,8 +1,6 @@
 class CreateUsers < ActiveRecord::Migration[8.1]
   def change
     create_table :users do |t|
-      # t.string :password_digest, null: false
-      # t.boolean :verified, null: false, default: false
       t.string :device_token, null: false
       t.timestamps
     end
