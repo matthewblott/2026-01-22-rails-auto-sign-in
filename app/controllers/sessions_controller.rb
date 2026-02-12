@@ -1,6 +1,8 @@
 class SessionsController < ApplicationController
   before_action :require_user, only: :destroy
 
+  skip_before_action :authenticate_user!, only: :create
+
   def create
     return redirect_to start_path if Current.user
 
