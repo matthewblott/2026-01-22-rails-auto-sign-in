@@ -1,37 +1,15 @@
 class ApplicationController < ActionController::Base
-  before_action :set_current_request_details
-  before_action :authenticate
+  before_action :load_current_user
 
   private
 
-  def authenticate
-    unless @token.present? && @session_record && @user
-      redirect_to sign_in_path
+  def load_current_user
+    token = cookies.encrypted[:device_token]
+    return unless token
+
+    if (user = User.find_by(device_token: token))
+      Current.user = user
     end
-  end
-
-  def set_current_request_details
-    @token = cookies.signed[:session_token]
-
-    unless @token.present?
-      return
-    end
-
-    @session_record = Session.find_by_id(@token)
-
-    unless @session_record
-      return
-    end
-
-    @user = User.find_by(id: @session_record.user_id)
-    
-    unless @user
-      return
-    end
-
-    Current.user = @user
-    Current.session = @session_record
-
   end
 
 end

@@ -1,24 +1,33 @@
 class SessionsController < ApplicationController
-  skip_before_action :authenticate, only: %i[ create ]
+  before_action :require_user, only: :destroy
 
   def create
-    user = User.new
-    user.password = 'password'
-    user.save!
-    @session = user.sessions.create!
-    cookies.signed.permanent[:session_token] = { value: @session.id, httponly: true }
+    return redirect_to start_path if Current.user
+
+    user = User.create!
+
+    cookies.permanent.encrypted[:device_token] = {
+      value: user.device_token,
+      httponly: true,
+      secure: Rails.env.production?,
+      same_site: :lax
+    }
+
+    Current.user = user
+
     redirect_to root_path
   end
 
   def destroy
-    Current.session.destroy
-    cookies.delete(:session_token)
-    reset_session
-
-    # Normally undisirable but probably not for this application
-    Current.user.destroy
-
+    Current.user&.destroy
+    cookies.delete(:device_token)
     redirect_to sign_in_path 
+  end
+
+  private
+
+  def require_user
+    redirect_to root_path unless Current.user
   end
 
 end
