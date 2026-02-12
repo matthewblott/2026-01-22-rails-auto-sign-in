@@ -1,8 +1,7 @@
 class ApplicationController < ActionController::Base
   before_action :load_current_user
   before_action :authenticate_user!
-
-  skip_before_action :authenticate_user!, only: []
+  # skip_before_action :authenticate_user!, only: []
 
   private
 
